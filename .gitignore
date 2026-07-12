@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Private files
+config.py
+instagram_state.json
+
+# Personal Data
+*csv
