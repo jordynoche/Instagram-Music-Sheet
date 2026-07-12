@@ -21,7 +21,6 @@ and genre
 Instagram often changes its website and so selectors may need updating.
 """
 
-
 class PlaywrightProgressSpinner:
     """Manages a terminal progress indicator with cycling dots (. .. ...) and a user-defined target count."""
 
@@ -56,7 +55,6 @@ class PlaywrightProgressSpinner:
         sys.stdout.write(f"\rSaved audio page opened!")
         sys.stdout.flush()
 
-
 def log_into_session():
 
     with sync_playwright() as p:
@@ -90,9 +88,8 @@ def log_into_session():
         browser.close()
 
 def export_music():
-
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(storage_state="instagram_state.json")
         page = context.new_page()
 
@@ -117,7 +114,7 @@ def export_music():
 
         saved_songs = [] # stores every song recorded
         seen_urls = set()
-
+        no_new_songs = 0
 
         while True:
             before_song_count_check = len(saved_songs)
@@ -156,19 +153,24 @@ def export_music():
 
             # checks if new songs were added
             if after_song_count_check == before_song_count_check:
+                no_new_songs += 1
+            else:
+                no_new_songs = 0
+
+            if no_new_songs >= 3:
                 break
 
             # scroll to find new songs
             page.mouse.wheel(0,1500)
-            for _ in range(10):
-                page.wait_for_timeout(300)
+            for _ in range(20):
+                page.wait_for_timeout(500)
                 progress_spinner.spin_once_song()
 
         progress_spinner.stop_song_find()
 
 
         total_songs = len(saved_songs)
-        songs_to_print = (int(input(f"\n{total_songs} songs found. How many do you want to print? ")))
+        songs_to_print = (int(input(f"\nHow many do you want to print? ")))
 
         with open("instagram_music.csv", "w",
                   newline="",
